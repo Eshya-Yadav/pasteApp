@@ -1,122 +1,147 @@
-import React, { useState } from 'react'
-import { useSelector, useDispatch } from 'react-redux';
-import { removeAllPastes } from '../redux/pasteSlice';
-import toast from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
 
-
+import { Calendar, Copy, Eye, PencilLine, Trash2, Share2 } from "lucide-react";
+import toast from "react-hot-toast";
+import { useSelector, useDispatch } from "react-redux";
+import { useState } from "react"; // Import useState
+import { removeAllPastes } from "../redux/pasteSlice";
+import { FormatDate } from "../utils/formatDate";
 
 
 const Paste = () => {
-  const navigate = useNavigate();
-
   const pastes = useSelector((state) => state.paste.pastes);
-  const [searchTerm, setSearchTerm] = useState('');
   const dispatch = useDispatch();
-  const filteredData = pastes.filter(
-    (paste) => paste.title.toLowerCase().includes(searchTerm.toLowerCase())
+  const [searchTerm, setSearchTerm] = useState(""); // State to hold the search term
+
+  const handleDelete = (id) => {
+    dispatch(removeAllPastes(id));
+  };
+
+  // Filter pastes based on search term (by title or content)
+  const filteredPastes = pastes.filter((paste) =>
+    paste.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  function handleDelete(pasteId) {
-    dispatch(removeAllPastes(pasteId));
-
-  }
-
-  function handleShare(pasteId) {
-    const shareLink = `${window.location.origin}/view/${pasteId}`;
-    if (navigator.share) {
-      navigator.share({
-        title: 'Check out this paste!',
-        text: 'Here’s a paste I wanted to share with you.',
-        url: shareLink,
-      })
-        .then(() => toast.success('Link shared successfully!'))
-        .catch((error) => toast.error('Failed to share: ' + error));
-    }
-    else {
-      // ✅ Fallback for desktop browsers
-      navigator.clipboard.writeText(shareLink);
-      toast.success('Share link copied to clipboard!');
-    }
-  }
-
-
-
   return (
-    <div>
-      <input
-        className='p-2 rounded-2xl min-w-[600px] mt-5 bg-red-200'
-        type='search'
-        placeholder='search here'
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
+    <div className="w-full h-full py-10 max-w-[1200px] mx-auto px-5 lg:px-0">
+      <div className="flex flex-col gap-y-3">
+        {/* Search */}
+        <div className="w-full flex gap-3 px-4 py-2  rounded-[0.3rem] border border-[rgba(128,121,121,0.3)]  mt-6">
+          <input
+            type="search"
+            placeholder="Search paste here..."
+            className="focus:outline-none w-full bg-transparent"
+            value={searchTerm} // Bind the input to searchTerm state
+            onChange={(e) => setSearchTerm(e.target.value)} // Update searchTerm on input change
+          />
+        </div>
 
-      <div className='flex flex-col gap-5 mt-8   bg-blue-200'>
-        {
-          filteredData.length > 0 &&
-          filteredData.map(
-            (paste) => {
-              return (
-                <div className='border' key={paste?._id}>
-                  <div>
-                    {paste.title}
+        {/* All Pastes */}
+        <div className="flex flex-col border border-[rgba(128,121,121,0.3)] py-4 rounded-[0.4rem]">
+          <h2 className="px-4 text-4xl font-bold border-b border-[rgba(128,121,121,0.3)] pb-4">
+            All Pastes
+          </h2>
+          <div className="w-full px-4 pt-4 flex flex-col gap-y-5">
+            {filteredPastes.length > 0 ? (
+              filteredPastes.map((paste) => (
+                <div
+                  key={paste?._id}
+                  className="border border-[rgba(128,121,121,0.3)] w-full gap-y-6 justify-between flex flex-col sm:flex-row p-4 rounded-[0.3rem]"
+                >
+                  {/* heading and Description */}
+                  <div className="w-[50%] flex flex-col space-y-3">
+                    <p className="text-4xl font-semibold ">{paste?.title}</p>
+                    <p className="text-sm font-normal line-clamp-3 max-w-[80%] text-[#707070]">
+                      {paste?.content}
+                    </p>
                   </div>
-                  <div>
-                    {paste.content}
-                  </div>
+
+                  {/* icons */}
+                  <div className="flex flex-col gap-y-4 sm:items-end">
+                    <div className="flex gap-2 flex-wrap sm:flex-nowrap">
 
 
-                  <div className='flex flex-row gap-5 place-content-evenly '>
+                      <button className="p-2 rounded-[0.2rem] bg-white border border-[#c7c7c7]  hover:bg-transparent group hover:border-blue-500"
+                      // onClick={() => toast.error("Not working")}
+                      >
+                        <a href={`/?pasteId=${paste?._id}`}>
+                          <PencilLine
+                            className="text-black group-hover:text-blue-500"
+                            size={20}
+                          />
+                        </a>
+                      </button>
 
 
-                    <button>
-                      <a href={`/?pasteId=${paste?._id}`}>
-                        edit
-                      </a>
-                    </button>
+                      <button className="p-2 rounded-[0.2rem] bg-white border border-[#c7c7c7]  hover:bg-transparent group hover:border-pink-500"
+                        onClick={() => handleDelete(paste?._id)}
+                      >
+                        <Trash2
+                          className="text-black group-hover:text-pink-500"
+                          size={20}
+                        />
+                      </button>
 
 
-
-                    <button onClick={() => navigate(`/pastes/${paste?._id}`)}>
-                      view
-                    </button>
-
-
-                    <button onClick={() => handleDelete(paste?._id)}>
-                      delete
-                    </button>
-
-
-                    <button onClick={() => {
-                      navigator.clipboard.writeText(paste?.content)
-                      toast.success('Content copied to clipboard')
-                    }}>
-                      copy
-                    </button>
-
-
-                    <button
-                      className='bg-purple-300 px-3 py-1 rounded-lg'
-                      onClick={() => handleShare(paste?._id)}>
-                      share
-                    </button>
+                      <button className="p-2 rounded-[0.2rem] bg-white border border-[#c7c7c7]  hover:bg-transparent group hover:border-orange-500">
+                        <a href={`/pastes/${paste?._id}`} target="_blank">
+                          <Eye
+                            className="text-black group-hover:text-orange-500"
+                            size={20}
+                          />
+                        </a>
+                      </button>
 
 
 
-                  </div>
-                  <div>
-                    {paste.createdAt}
+                      <button
+                        className="p-2 rounded-[0.2rem] bg-white border border-[#c7c7c7]  hover:bg-transparent group hover:border-green-500"
+                        onClick={() => {
+                          navigator.clipboard.writeText(paste?.content);
+                          toast.success("Copied to Clipboard");
+                        }}>
+
+
+                        <Copy
+                          className="text-black group-hover:text-green-500"
+                          size={20} />
+                      </button>
+
+
+
+                      <button
+                        className="p-2 rounded-[0.2rem] bg-white border border-[#c7c7c7] hover:bg-transparent group hover:border-purple-500"
+                        onClick={() => {
+                          const shareLink = `${window.location.origin}/pastes/${paste?._id}`;
+                          navigator.clipboard.writeText(shareLink);
+                          toast.success("Link copied to clipboard!");
+                        }}
+                      >
+                        <Share2 className="text-black group-hover:text-purple-500" size={20} />
+                      </button>
+
+
+
+
+                    </div>
+
+                    <div className="gap-x-2 flex ">
+                      <Calendar className="text-black" size={20} />
+                      {FormatDate(paste?.createdAt)}
+                    </div>
                   </div>
                 </div>
-              )
-            }
-          )
-        }
-
+              ))
+            ) : (
+              <div className="text-2xl text-center w-full text-chileanFire-500">
+                No Data Found
+              </div>
+            )}
+          </div>
+        </div>
       </div>
-    </div >
-  )
-}
+    </div>
+  );
+};
 
-export default Paste
+export default Paste;
+
