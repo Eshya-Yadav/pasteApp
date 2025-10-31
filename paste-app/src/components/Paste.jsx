@@ -2,8 +2,13 @@ import React, { useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux';
 import { removeAllPastes } from '../redux/pasteSlice';
 import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
+
+
+
 
 const Paste = () => {
+  const navigate = useNavigate();
 
   const pastes = useSelector((state) => state.paste.pastes);
   const [searchTerm, setSearchTerm] = useState('');
@@ -17,7 +22,23 @@ const Paste = () => {
 
   }
 
-
+  function handleShare(pasteId) {
+    const shareLink = `${window.location.origin}/view/${pasteId}`;
+    if (navigator.share) {
+      navigator.share({
+        title: 'Check out this paste!',
+        text: 'Here’s a paste I wanted to share with you.',
+        url: shareLink,
+      })
+        .then(() => toast.success('Link shared successfully!'))
+        .catch((error) => toast.error('Failed to share: ' + error));
+    }
+    else {
+      // ✅ Fallback for desktop browsers
+      navigator.clipboard.writeText(shareLink);
+      toast.success('Share link copied to clipboard!');
+    }
+  }
 
 
 
@@ -44,25 +65,45 @@ const Paste = () => {
                   <div>
                     {paste.content}
                   </div>
+
+
                   <div className='flex flex-row gap-5 place-content-evenly '>
+
+
                     <button>
-                      edit
+                      <a href={`/?pasteId=${paste?._id}`}>
+                        edit
+                      </a>
                     </button>
-                    <button>
+
+
+
+                    <button onClick={() => navigate(`/pastes/${paste?._id}`)}>
                       view
                     </button>
+
+
                     <button onClick={() => handleDelete(paste?._id)}>
                       delete
                     </button>
+
+
                     <button onClick={() => {
                       navigator.clipboard.writeText(paste?.content)
                       toast.success('Content copied to clipboard')
                     }}>
                       copy
                     </button>
-                    <button>
+
+
+                    <button
+                      className='bg-purple-300 px-3 py-1 rounded-lg'
+                      onClick={() => handleShare(paste?._id)}>
                       share
                     </button>
+
+
+
                   </div>
                   <div>
                     {paste.createdAt}

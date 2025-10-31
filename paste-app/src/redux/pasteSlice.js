@@ -1,11 +1,19 @@
 import { createSlice } from '@reduxjs/toolkit'
 import toast from 'react-hot-toast';
 
+const loadPastes = () => {
+  try {
+    const stored = localStorage.getItem('pastes')
+    return stored ? JSON.parse(stored) : []
+  } catch (error) {
+    console.error('❌ Corrupted localStorage detected. Clearing...', error)
+    localStorage.removeItem('pastes')
+    return []
+  }
+}
 
 const initialState = {
-  pastes: localStorage.getItem('pastes')
-    ? JSON.parse(localStorage.getItem('pastes'))
-    : [],
+  pastes: loadPastes(),
 }
 
 export const pasteSlice = createSlice({
@@ -44,7 +52,7 @@ export const pasteSlice = createSlice({
       const pasteId = action.payload;
       console.log(pasteId);
       const index = state.pastes.findIndex((item) => item._id === pasteId);
-      
+
       if (index >= 0) {
         state.pastes.splice(index, 1);
         localStorage.setItem('pastes', JSON.stringify(state.pastes));
