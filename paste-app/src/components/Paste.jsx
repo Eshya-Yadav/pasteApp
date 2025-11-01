@@ -60,7 +60,7 @@ const Paste = () => {
                     <div className="flex gap-2 flex-wrap sm:flex-nowrap">
 
 
-                      <button className="p-2 rounded-[0.2rem] bg-white border border-[#c7c7c7]  hover:bg-transparent group hover:border-blue-500"
+                      <button className="p-2 rounded-[0.2rem] bg-white border border-[#c7c7c7]  hover:bg-transparent group hover:border-blue-00"
                       // onClick={() => toast.error("Not working")}
                       >
                         <a href={`/?pasteId=${paste?._id}`}>
