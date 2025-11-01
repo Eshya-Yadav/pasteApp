@@ -73,3 +73,7 @@ If Vercel fails with vite: command not found, ensure Build Command is npm run bu
 >🙋‍♀️ Want to contribute?
 
 Feel free to open issues or submit pull requests. Suggestions and improvements are welcome!
+
+## 🌐 Live Demo
+Check it out here: [Paste App on Vercel](https://paste-app-nine-neon.vercel.app)
+
